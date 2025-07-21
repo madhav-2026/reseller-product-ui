@@ -5,16 +5,7 @@ import AdminAddProduct from './components/AdminAddProduct';
 import OrderHistory from './components/OrderHistory';
 import LoginForm from './components/LoginForm';
 import AdminOrderList from './components/AdminOrderList';
-import LocationDistance from './components/LocationDistance';
 import OrderSummary from './components/OrderSummary';
-
-const categories = [
-  "Groceries",
-  "Electronics",
-  "Clothing",
-  "Books",
-  "Accessories"
-];
 
 function App() {
   const [cart, setCart] = useState(() => {
@@ -31,7 +22,6 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshProducts, setRefreshProducts] = useState(true); // Set to true to trigger initial load
   const [profileOpen, setProfileOpen] = useState(false);
-  const [, setDeliveryDistance] = useState(null);
   const [showOrderSummary, setShowOrderSummary] = useState(false);
 
   // Save cart to localStorage whenever it changes
@@ -67,33 +57,15 @@ function App() {
     }
   }, []);
 
-  const handleCategoryClick = (cat) => {
-    setSelectedCategory(cat);
-    setShowCart(false);
-    setShowAdmin(false);
-    setShowOrderHistory(false);
-  };
-
   if (!isLoggedIn) {
     return <LoginForm onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
-      {/* Sidebar */}
-      <aside className="w-60 bg-white/80 border-r border-purple-200 p-6 flex flex-col justify-between">
+      {/* Remove Sidebar */}
+      {/* <aside className="w-60 bg-white/80 border-r border-purple-200 p-6 flex flex-col justify-between">
         <div>
-          {/* Remove logo and welcome message */}
-          {/* <div className="flex items-center mb-8">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg mr-3">
-              <span className="text-white text-2xl font-extrabold">ATO</span>
-            </div>
-            <div className="text-purple-700 font-semibold text-lg">
-              Welcome {user?.name || user?.firstName || "Customer"}
-            </div>
-          </div> */}
-          {/* Move LocationDistance here */}
-          <LocationDistance setDeliveryDistance={setDeliveryDistance} />
           <div className="font-bold text-gray-700 mb-2 mt-6">Categories</div>
           <ul className="space-y-2">
             {categories.map(cat => (
@@ -114,20 +86,142 @@ function App() {
             ))}
           </ul>
         </div>
-        {/* Logout button removed from sidebar */}
-      </aside>
+      </aside> */}
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="p-4 bg-blue-100 flex items-center justify-between shadow-md border-b border-blue-200 rounded-b-2xl transition-all duration-300">
-          {/* Remove LocationDistance from header */}
-          {/* <LocationDistance setDeliveryDistance={setDeliveryDistance} /> */}
-          {/* Left: Navigation */}
-          <div className="flex gap-2 md:gap-4">
-            {/* Admin buttons removed from here */}
+        <header className="p-4 bg-blue-100 flex flex-col shadow-md border-b border-blue-200 rounded-b-2xl transition-all duration-300">
+          {/* Top info section moved to left */}
+          <div className="flex items-center w-full mb-2">
+            <div className="flex flex-col items-start">
+              <span className="text-2xl font-extrabold text-blue-700">ATO</span>
+              <span className="text-xs text-gray-600 mt-1">Delivery in 30 min</span>
+              <a
+
+                href={`https://www.google.com/maps/search/?api=1&query=17.558595,78.261703`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-blue-700 hover:underline mt-1"
+                style={{ whiteSpace: "nowrap" }}
+              >
+                <svg
+                  className="w-4 h-4 text-blue-700"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" />
+                </svg>
+                <span className="font-semibold">ATO Shop, Main Road, Hyderabad, Telangana</span>
+              </a>
+            </div>
+            {/* Spacer for alignment */}
+            <div className="flex-1"></div>
+            {/* Cart/Profile/etc. remain on the right */}
+            <div className="flex items-center gap-4 mt-2">
+              {user && user.phone !== "+918074689114" && (
+                <button
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-lg shadow hover:bg-blue-300 font-semibold transition"
+                  onClick={() => {
+                    setShowCart(true);
+                    setShowAdmin(false);
+                    setShowOrderHistory(false);
+                  }}
+                >
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
+                    alt="Cart"
+                    className="w-6 h-6"
+                  />
+                  Cart <span className="ml-1">({cart.length})</span>
+                </button>
+              )}
+              {/* Profile/Settings */}
+              <div className="relative">
+                <button
+                  type="button"
+                  className="flex items-center gap-2 px-3 py-2 bg-blue-200 text-blue-800 rounded-full shadow hover:bg-blue-300 font-semibold transition"
+                  tabIndex={0}
+                  onClick={() => setProfileOpen((open) => !open)}
+                  onBlur={() => setTimeout(() => setProfileOpen(false), 150)} // closes on blur
+                >
+                  <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="7" r="4" />
+                    <path d="M5.5 21a7.5 7.5 0 0 1 13 0" />
+                  </svg>
+                  <span className="md:inline">{user?.name || user?.firstName || "Profile"}</span>
+                  <svg className="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50">
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
+                      onClick={() => {
+                        alert('Account page coming soon!');
+                        setProfileOpen(false);
+                      }}
+                    >
+                      Account
+                    </button>
+                    {/* Show "Your Orders" only for non-admin users */}
+                    {user && user.phone !== "+918074689114" && (
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
+                        onClick={() => {
+                          setShowOrderHistory(true);
+                          setShowCart(false);
+                          setShowAdmin(false);
+                          setShowOrderSummary(false); // <-- Add this line to hide OrderSummary
+                          setProfileOpen(false);
+                        }}
+                      >
+                        Your Orders
+                      </button>
+                    )}
+                    {/* Admin links in profile dropdown */}
+                    {user && user.phone === "+918074689114" && (
+                      <>
+                        <button
+                          className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
+                          onClick={() => {
+                            setShowAdmin("orders");
+                            setShowCart(false);
+                            setShowOrderHistory(false);
+                            setProfileOpen(false);
+                          }}
+                        >
+                          Admin Orders
+                        </button>
+                        <button
+                          className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
+                          onClick={() => {
+                            setShowAdmin(true);
+                            setShowCart(false);
+                            setShowOrderHistory(false);
+                            setProfileOpen(false);
+                          }}
+                        >
+                          Admin Add Product
+                        </button>
+                      </>
+                    )}
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-blue-50 text-red-600"
+                      onClick={() => {
+                        handleLogout();
+                        setProfileOpen(false);
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          {/* Center: Search Bar */}
-          <div className="flex-1 flex justify-center">
+          {/* Search Bar */}
+          <div className="flex-1 flex justify-center w-full">
             <input
               type="text"
               className="w-full max-w-xs px-4 py-2 border-0 rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white text-blue-700 placeholder-blue-400 transition"
@@ -136,112 +230,28 @@ function App() {
               onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
-          {/* Right: Cart and Profile */}
-          <div className="flex items-center gap-4">
-            {user && user.phone !== "+918074689114" && (
-              <button
-                className="flex items-center gap-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-lg shadow hover:bg-blue-300 font-semibold transition"
-                onClick={() => {
-                  setShowCart(true);
-                  setShowAdmin(false);
-                  setShowOrderHistory(false);
-                }}
-              >
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
-                  alt="Cart"
-                  className="w-6 h-6"
-                />
-                Cart <span className="ml-1">({cart.length})</span>
-              </button>
-            )}
-            {/* Profile/Settings */}
-            <div className="relative">
-              <button
-                type="button"
-                className="flex items-center gap-2 px-3 py-2 bg-blue-200 text-blue-800 rounded-full shadow hover:bg-blue-300 font-semibold transition"
-                tabIndex={0}
-                onClick={() => setProfileOpen((open) => !open)}
-                onBlur={() => setTimeout(() => setProfileOpen(false), 150)} // closes on blur
-              >
-                <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <circle cx="12" cy="7" r="4" />
-                  <path d="M5.5 21a7.5 7.5 0 0 1 13 0" />
-                </svg>
-                <span className="md:inline">{user?.name || user?.firstName || "Profile"}</span>
-                <svg className="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
-              </button>
-              {profileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50">
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
-                    onClick={() => {
-                      alert('Account page coming soon!');
-                      setProfileOpen(false);
-                    }}
-                  >
-                    Account
-                  </button>
-                  {/* Show "Your Orders" only for non-admin users */}
-                  {user && user.phone !== "+918074689114" && (
-                    <button
-                      className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
-                      onClick={() => {
-                        setShowOrderHistory(true);
-                        setShowCart(false);
-                        setShowAdmin(false);
-                        setShowOrderSummary(false); // <-- Add this line to hide OrderSummary
-                        setProfileOpen(false);
-                      }}
-                    >
-                      Your Orders
-                    </button>
-                  )}
-                  {/* Admin links in profile dropdown */}
-                  {user && user.phone === "+918074689114" && (
-                    <>
-                      <button
-                        className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
-                        onClick={() => {
-                          setShowAdmin("orders");
-                          setShowCart(false);
-                          setShowOrderHistory(false);
-                          setProfileOpen(false);
-                        }}
-                      >
-                        Admin Orders
-                      </button>
-                      <button
-                        className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
-                        onClick={() => {
-                          setShowAdmin(true);
-                          setShowCart(false);
-                          setShowOrderHistory(false);
-                          setProfileOpen(false);
-                        }}
-                      >
-                        Admin Add Product
-                      </button>
-                    </>
-                  )}
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-blue-50 text-red-600"
-                    onClick={() => {
-                      handleLogout();
-                      setProfileOpen(false);
-                    }}
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
         </header>
 
         {/* Main Content */}
         <main className="p-4 flex justify-center">
           <div className="w-full max-w-3xl">
+            {/* Category Buttons */}
+            <div className="mb-4 flex flex-wrap gap-2">
+              {["Groceries", "Fruits", "Vegetables", "Snacks"].map(cat => (
+                <button
+                  key={cat}
+                  className={`px-4 py-2 rounded border font-semibold transition ${
+                    selectedCategory === cat
+                      ? "bg-purple-200 text-purple-900 border-purple-400"
+                      : "bg-white text-gray-700 border-purple-200 hover:bg-purple-50"
+                  }`}
+                  onClick={() => setSelectedCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            {/* Product List */}
             {showOrderSummary ? (
               <OrderSummary
                 cart={cart}
