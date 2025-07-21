@@ -13,10 +13,6 @@ function ProductList({ cart, setCart, selectedCategory, searchTerm, refreshProdu
     .catch((err) => console.error(err));
   }, [refreshProducts]); // Add refreshProducts here
 
-  const addToCart = (product) => {
-    setCart([...cart, product]);
-  };
-
   // Filtering logic
   const filteredProducts = products.filter(product => {
     // Always apply search filter
@@ -34,27 +30,22 @@ function ProductList({ cart, setCart, selectedCategory, searchTerm, refreshProdu
   });
 
   return (
-    <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 justify-items-center">
-      {filteredProducts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center w-full py-8">
-          <div className="text-center text-gray-500 mb-4">No products found.</div>
-          <button
-            className="px-6 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600 transition"
-            onClick={() => {
-              // Optional: If you want to close the cart or reset search/category, call the appropriate function here.
-              // Example: setShowCart && setShowCart(false);
-              // If you want to clear search:
-              // setSearchTerm && setSearchTerm("");
-            }}
-          >
-            Close
-          </button>
-        </div>
-      ) : (
-        filteredProducts.map((p) => (
-          <ProductCard key={p.id} product={p} addToCart={addToCart} />
-        ))
-      )}
+    <div className="w-full max-w-sm sm:max-w-3xl mx-auto p-2 sm:p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        {filteredProducts.length === 0 ? (
+          <div className="col-span-full text-center text-gray-500 py-12">
+            No products found.
+          </div>
+        ) : (
+          filteredProducts.map((product) => (
+            <ProductCard
+              key={product.id || product._id}
+              product={product}
+              addToCart={prod => setCart(prev => [...prev, prod])}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 }

@@ -14,17 +14,25 @@ const ProductCard = ({ product, addToCart }) => {
     // Use function initializer to set weight only once
     const [weight, setWeight] = useState(() => (isWeightProduct ? weightOptions[0] : 1));
 
+    // Responsive image fallback
+    const imageSrc = product.image
+        ? `http://localhost:9090/${product.image}`
+        : "https://placehold.co/120x120?text=No+Image";
+
     return (
-        <div className="w-40 bg-white shadow-md rounded-lg p-2 m-2 flex flex-col items-center">
+        <div className="w-full max-w-xs sm:max-w-sm bg-white shadow-md rounded-lg p-3 sm:p-4 m-2 flex flex-col items-center transition hover:shadow-xl">
             <img
-                src={`http://localhost:9090/${product.image}`}
+                src={imageSrc}
                 alt={product.name}
-                className="w-24 h-24 object-cover rounded mb-2"
+                className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded mb-2"
+                onError={e => { e.target.src = "https://placehold.co/120x120?text=No+Image"; }}
             />
-            <h2 className="mt-2 text-lg font-semibold">{product.name}</h2>
+            <h2 className="mt-2 text-base sm:text-lg font-semibold text-center">{product.name}</h2>
             {isWeightProduct ? (
                 <>
-                    <p className="text-gray-600">₹{Math.round((product.price * weight) / 1000)} / {weight >= 1000 ? (weight/1000) + 'kg' : weight + 'g'}</p>
+                    <p className="text-gray-600 text-sm sm:text-base">
+                        ₹{Math.round((product.price * weight) / 1000)} / {weight >= 1000 ? (weight/1000) + 'kg' : weight + 'g'}
+                    </p>
                     <div className="flex items-center gap-2 mt-2">
                         <label htmlFor="weight" className="text-sm">Qty:</label>
                         <select
@@ -43,7 +51,9 @@ const ProductCard = ({ product, addToCart }) => {
                 </>
             ) : (
                 <>
-                    <p className="text-gray-600">₹{product.price * qty} / {product.quantity} {qty > 1 ? `(${qty} pcs)` : ''}</p>
+                    <p className="text-gray-600 text-sm sm:text-base">
+                        ₹{product.price * qty} / {product.quantity} {qty > 1 ? `(${qty} pcs)` : ''}
+                    </p>
                     <div className="flex items-center gap-2 mt-2">
                         <label htmlFor="qty" className="text-sm">Qty:</label>
                         <input
@@ -58,15 +68,8 @@ const ProductCard = ({ product, addToCart }) => {
                 </>
             )}
             <button
-                onClick={() => {
-                    if (isWeightProduct) {
-                        const price = Math.round((product.price * weight) / 1000);
-                        addToCart({ ...product, quantity: weight + 'g', price });
-                    } else {
-                        addToCart({ ...product, quantity: qty, price: product.price * qty });
-                    }
-                }}
-                className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                onClick={() => addToCart({ ...product, quantity: isWeightProduct ? weight : qty })}
+                className="mt-3 w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold transition"
             >
                 Add to Cart
             </button>

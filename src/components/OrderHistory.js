@@ -26,8 +26,8 @@ const OrderHistory = ({ user, setShowOrderHistory, setSelectedCategory }) => {
   }
 
   return (
-    <div className="p-4 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 min-h-screen">
-      <h2 className="text-3xl mb-8 text-blue-700 flex items-center gap-3 drop-shadow">
+    <div className="w-full max-w-sm sm:max-w-2xl mx-auto p-4 sm:p-8 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 min-h-screen rounded-2xl shadow-xl">
+      <h2 className="text-2xl sm:text-3xl mb-8 text-blue-700 flex items-center gap-3 drop-shadow">
         <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4M4 11h16" /></svg>
         Order History
       </h2>
@@ -35,9 +35,9 @@ const OrderHistory = ({ user, setShowOrderHistory, setSelectedCategory }) => {
         orders.map((order, idx) => (
           <div
             key={idx}
-            className={`mb-10 p-6 border-2 rounded-2xl shadow-xl bg-white/80 hover:bg-white transition-all duration-200 ${statusColors[order.status] || statusColors.Pending}`}
+            className={`mb-8 p-4 sm:p-6 border-2 rounded-2xl shadow-xl bg-white/80 hover:bg-white transition-all duration-200 ${statusColors[order.status] || statusColors.Pending}`}
           >
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
               <div className="font-semibold text-gray-700">
                 <span className="mr-2">Order Date:</span>
                 <span className="text-gray-900">{order.date ? new Date(order.date).toLocaleString() : "N/A"}</span>
@@ -51,7 +51,7 @@ const OrderHistory = ({ user, setShowOrderHistory, setSelectedCategory }) => {
               <div className="space-y-2">
                 {order.items && order.items.length > 0
                   ? order.items.map(item => (
-                      <div key={item._id || item.name} className="flex justify-between items-center bg-purple-50 rounded px-4 py-2 shadow-sm">
+                      <div key={item._id || item.name} className="flex justify-between items-center bg-purple-50 rounded px-2 sm:px-4 py-2 shadow-sm">
                         <span className="text-gray-900 font-medium">
                           {item.name} <span className="text-xs text-gray-500">x {item.quantity}</span>
                         </span>
@@ -62,7 +62,7 @@ const OrderHistory = ({ user, setShowOrderHistory, setSelectedCategory }) => {
               </div>
             </div>
             <div className="flex justify-end mt-4">
-              <span className="text-xl text-blue-700 drop-shadow">
+              <span className="text-lg sm:text-xl text-blue-700 drop-shadow">
                 Total: ₹{order.total}
               </span>
             </div>
@@ -72,13 +72,13 @@ const OrderHistory = ({ user, setShowOrderHistory, setSelectedCategory }) => {
         <div className="text-gray-500 text-center mt-8">No orders found.</div>
       )}
       {/* Close Button at the end */}
-      <div className="flex justify-end mt-8">
+      <div className="flex flex-col sm:flex-row justify-end mt-8 gap-2">
         <button
           onClick={() => {
             if (setShowOrderHistory) setShowOrderHistory(false);
             if (setSelectedCategory) setSelectedCategory("Groceries");
           }}
-          className="px-6 py-3 rounded-lg text-white text-lg font-semibold shadow transition bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700"
+          className="w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg text-white text-base sm:text-lg font-semibold shadow transition bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700"
         >
           Close
         </button>
