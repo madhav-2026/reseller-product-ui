@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ProductCard from './ProductCard';
 
-function ProductList({ cart, setCart, selectedCategory, searchTerm, refreshProducts }) {
+function ProductList({ cart, setCart, selectedCategory, searchTerm, refreshProducts, user }) {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -42,6 +42,7 @@ function ProductList({ cart, setCart, selectedCategory, searchTerm, refreshProdu
               key={product.id || product._id}
               product={product}
               addToCart={prod => setCart(prev => [...prev, prod])}
+              user={user} // <-- Add this line
             />
           ))
         )}

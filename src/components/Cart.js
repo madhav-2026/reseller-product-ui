@@ -1,46 +1,7 @@
-import React from 'react';
-import axios from 'axios';
+import React from "react";
 
-function Cart({ cart, setCart, user, onRemove, onOrderPlaced, setShowCart, setSelectedCategory }) {
+function Cart({ cart, setCart, user, onRemove, onOrderPlaced, setShowCart, setShowOrderSummary, setSelectedCategory }) {
   const total = cart.reduce((acc, item) => acc + item.price, 0);
-
-  const placeOrder = () => {
-    if (cart.length === 0) {
-      alert("Your cart is empty!");
-      return;
-    }
-
-    const orderData = {
-      userPhone: user?.phone || '',
-      items: cart,
-      total: cart.reduce((acc, item) => acc + item.price, 0),
-    };
-
-    axios.post('http://localhost:9090/api/orders/place', orderData)
-      .then(res => {
-        console.log("Order stored:", res.data);
-
-        // 2. Prepare WhatsApp message
-        const customerName = user?.name || user?.firstName || '';
-        const customerAddress = user?.address || '';
-        const customerPhone = user?.phone || '';
-        const messageText =
-          `Dear ${customerName},\nThank You For Your Order:)\n\n` +
-          `Please Find Your Order Details Below:\n\n` +
-          cart.map((p) => `${p.name} (${p.quantity || 1}) - ₹${p.price}`).join('\n') +
-          `\n\nTotal: ₹${total}\n\n` +
-          `Delivery Address:${customerAddress ? '\n' + customerAddress : ''}\nPhone: ${customerPhone}\nGoogle Map Location: [Paste your location link here]`;
-        const message = encodeURIComponent(messageText);
-
-        const phone = '919182455214'; // Replace with your WhatsApp number
-        window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-        if (onOrderPlaced) onOrderPlaced();
-      })
-      .catch(err => {
-        console.error("Order failed:", err);
-        alert("Failed to place order. Please try again.");
-      });
-  };
 
   return (
     <div className="w-full max-w-sm sm:max-w-2xl mx-auto p-4 sm:p-8 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 shadow-2xl rounded-3xl border border-blue-200">
@@ -161,35 +122,21 @@ function Cart({ cart, setCart, user, onRemove, onOrderPlaced, setShowCart, setSe
               </tfoot>
             </table>
           </div>
-          <div className="mb-2 text-center text-blue-700 font-medium bg-blue-50 rounded px-2 sm:px-4 py-2 shadow mt-4">
-            Currently accepting orders on WhatsApp and UPI/COD payment at the time of order delivery.
-          </div>
         </>
       )}
       <div className="flex flex-col items-center justify-center gap-2 mt-8">
         <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 w-full">
           <button
-            onClick={placeOrder}
-            className={`w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg text-white text-base sm:text-lg font-semibold shadow transition ${
-              cart.length === 0
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800'
-            }`}
-            disabled={cart.length === 0}
+            onClick={() => {
+              setShowOrderSummary(true); // Show Order Summary screen
+              setShowCart(false);        // Hide Cart screen
+            }}
+            className="w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg text-white text-base sm:text-lg font-semibold shadow transition bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700"
           >
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-              alt="WhatsApp"
-              className="inline-block w-6 h-6 mr-2 align-middle"
-              style={{ verticalAlign: 'middle', display: 'inline' }}
-            />
-            Place Order On WhatsApp
+            Order Summary
           </button>
           <button
-            onClick={() => {
-              if (setShowCart) setShowCart(false);
-              if (setSelectedCategory) setSelectedCategory("Groceries");
-            }}
+            onClick={() => setShowCart(false)}
             className="w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg text-white text-base sm:text-lg font-semibold shadow transition bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 mt-2 sm:mt-0"
           >
             Close

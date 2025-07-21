@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const ProductCard = ({ product, addToCart }) => {
+const ProductCard = ({ product, addToCart, user }) => {
     const [qty, setQty] = useState(1);
     const isWeightProduct =
         (product.unit && (product.unit.toLowerCase().includes('kg') || product.unit.toLowerCase().includes('g')))
@@ -67,12 +67,14 @@ const ProductCard = ({ product, addToCart }) => {
                     </div>
                 </>
             )}
-            <button
-                onClick={() => addToCart({ ...product, quantity: isWeightProduct ? weight : qty })}
-                className="mt-3 w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold transition"
-            >
-                Add to Cart
-            </button>
+            {user && user.phone !== "+918074689114" && (
+                <button
+                    onClick={() => addToCart(product)}
+                    className="mt-3 w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold transition"
+                >
+                    Add to Cart
+                </button>
+            )}
         </div>
     );
 };

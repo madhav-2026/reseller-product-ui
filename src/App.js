@@ -6,6 +6,7 @@ import OrderHistory from './components/OrderHistory';
 import LoginForm from './components/LoginForm';
 import AdminOrderList from './components/AdminOrderList';
 import LocationDistance from './components/LocationDistance';
+import OrderSummary from './components/OrderSummary';
 
 const categories = [
   "Groceries",
@@ -26,12 +27,12 @@ function App() {
   const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null); // { name, address, ... }
-  const [orderSuccess, setOrderSuccess] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Groceries"); // Set default to "Groceries"
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshProducts, setRefreshProducts] = useState(true); // Set to true to trigger initial load
   const [profileOpen, setProfileOpen] = useState(false);
   const [, setDeliveryDistance] = useState(null);
+  const [showOrderSummary, setShowOrderSummary] = useState(false);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
@@ -71,7 +72,6 @@ function App() {
     setShowCart(false);
     setShowAdmin(false);
     setShowOrderHistory(false);
-    setOrderSuccess(false);
   };
 
   if (!isLoggedIn) {
@@ -83,35 +83,36 @@ function App() {
       {/* Sidebar */}
       <aside className="w-60 bg-white/80 border-r border-purple-200 p-6 flex flex-col justify-between">
         <div>
-          <div className="flex items-center mb-8">
+          {/* Remove logo and welcome message */}
+          {/* <div className="flex items-center mb-8">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg mr-3">
               <span className="text-white text-2xl font-extrabold">ATO</span>
             </div>
             <div className="text-purple-700 font-semibold text-lg">
               Welcome {user?.name || user?.firstName || "Customer"}
             </div>
-          </div>
-          <div>
-            <div className="font-bold text-gray-700 mb-2">Categories</div>
-            <ul className="space-y-2">
-              {categories.map(cat => (
-                <li key={cat}>
-                  <button
-                    className={`w-full text-left px-3 py-2 rounded transition ${
-                      selectedCategory === cat
-                        ? "bg-purple-200 text-purple-900 font-semibold"
-                        : "hover:bg-purple-100 text-gray-700"
-                    }`}
-                    onClick={() => handleCategoryClick(cat)}
-                    disabled={cat !== "Groceries"}
-                    style={cat !== "Groceries" ? { opacity: 0.5, cursor: "not-allowed" } : {}}
-                  >
-                    {cat}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          </div> */}
+          {/* Move LocationDistance here */}
+          <LocationDistance setDeliveryDistance={setDeliveryDistance} />
+          <div className="font-bold text-gray-700 mb-2 mt-6">Categories</div>
+          <ul className="space-y-2">
+            {categories.map(cat => (
+              <li key={cat}>
+                <button
+                  className={`w-full text-left px-3 py-2 rounded transition ${
+                    selectedCategory === cat
+                      ? "bg-purple-200 text-purple-900 font-semibold"
+                      : "hover:bg-purple-100 text-gray-700"
+                  }`}
+                  onClick={() => handleCategoryClick(cat)}
+                  disabled={cat !== "Groceries"}
+                  style={cat !== "Groceries" ? { opacity: 0.5, cursor: "not-allowed" } : {}}
+                >
+                  {cat}
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
         {/* Logout button removed from sidebar */}
       </aside>
@@ -119,8 +120,8 @@ function App() {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="p-4 bg-blue-100 flex items-center justify-between shadow-md border-b border-blue-200 rounded-b-2xl transition-all duration-300">
-          {/* Show location distance at the top right */}
-          <LocationDistance setDeliveryDistance={setDeliveryDistance} />
+          {/* Remove LocationDistance from header */}
+          {/* <LocationDistance setDeliveryDistance={setDeliveryDistance} /> */}
           {/* Left: Navigation */}
           <div className="flex gap-2 md:gap-4">
             {/* Admin buttons removed from here */}
@@ -144,7 +145,6 @@ function App() {
                   setShowCart(true);
                   setShowAdmin(false);
                   setShowOrderHistory(false);
-                  setOrderSuccess(false);
                 }}
               >
                 <img
@@ -190,7 +190,7 @@ function App() {
                         setShowOrderHistory(true);
                         setShowCart(false);
                         setShowAdmin(false);
-                        setOrderSuccess(false);
+                        setShowOrderSummary(false); // <-- Add this line to hide OrderSummary
                         setProfileOpen(false);
                       }}
                     >
@@ -206,7 +206,6 @@ function App() {
                           setShowAdmin("orders");
                           setShowCart(false);
                           setShowOrderHistory(false);
-                          setOrderSuccess(false);
                           setProfileOpen(false);
                         }}
                       >
@@ -243,65 +242,49 @@ function App() {
         {/* Main Content */}
         <main className="p-4 flex justify-center">
           <div className="w-full max-w-3xl">
-            {orderSuccess ? (
-              <div className="flex flex-col items-center justify-center mt-8">
-                <div className="font-bold text-xl text-green-700 text-center w-full mb-2">
-                  Your order has been placed successfully!
-                </div>
-                <button
-                  className="px-8 py-3 bg-green-600 text-white rounded hover:bg-green-700 font-semibold shadow text-lg"
-                  onClick={() => {
-                    setOrderSuccess(false);
-                    setShowCart(false);
-                    setShowAdmin(false);
-                    setShowOrderHistory(false);
-                  }}
-                >
-                  Order Again
-                </button>
-              </div>
+            {showOrderSummary ? (
+              <OrderSummary
+                cart={cart}
+                onClose={() => {
+                  setShowOrderSummary(false);
+                  setShowCart(true); // Show cart again when closing summary
+                }}
+              />
+            ) : showOrderHistory ? (
+              <OrderHistory
+                user={user}
+                setShowOrderHistory={setShowOrderHistory}
+                setSelectedCategory={setSelectedCategory}
+              />
+            ) : showAdmin === "orders" ? (
+              <AdminOrderList
+                setShowAdmin={setShowAdmin}
+                setSelectedCategory={setSelectedCategory}
+              />
+            ) : showAdmin ? (
+              <AdminAddProduct setShowAdmin={setShowAdmin} setSelectedCategory={setSelectedCategory} />
+            ) : showCart ? (
+              <Cart
+                cart={cart}
+                setCart={setCart}
+                user={user}
+                onRemove={(removeIndex) => {
+                  setCart(cart => cart.filter((_, idx) => idx !== removeIndex));
+                }}
+                setShowCart={setShowCart}
+                setShowOrderSummary={setShowOrderSummary} // pass this to Cart
+                setSelectedCategory={setSelectedCategory}
+              />
             ) : (
-              <>
-                {showOrderHistory ? (
-                  <OrderHistory
-                    user={user}
-                    setShowOrderHistory={setShowOrderHistory}
-                    setSelectedCategory={setSelectedCategory}
-                  />
-                ) : showAdmin === "orders" ? (
-                  <AdminOrderList
-                    setShowAdmin={setShowAdmin}
-                    setSelectedCategory={setSelectedCategory}
-                  />
-                ) : showAdmin ? (
-                  <AdminAddProduct setShowAdmin={setShowAdmin} setSelectedCategory={setSelectedCategory} />
-                ) : showCart ? (
-                  <Cart
-                    cart={cart}
-                    setCart={setCart} // <-- Add this line!
-                    user={user}
-                    onRemove={(removeIndex) => {
-                      setCart(cart => cart.filter((_, idx) => idx !== removeIndex));
-                    }}
-                    onOrderPlaced={() => {
-                      setOrderSuccess(true);
-                      setCart([]);
-                    }}
-                    setShowCart={setShowCart}
-                    setSelectedCategory={setSelectedCategory}
-                  />
-                ) : (
-                  // Always show all products by default when logged in, filtered by search
-                  <ProductList
-                    cart={cart}
-                    setCart={setCart}
-                    selectedCategory={selectedCategory}
-                    searchTerm={searchTerm}
-                    refreshProducts={refreshProducts}
-                    user={user}
-                  />
-                )}
-              </>
+              // Always show all products by default when logged in, filtered by search
+              <ProductList
+                cart={cart}
+                setCart={setCart}
+                selectedCategory={selectedCategory}
+                searchTerm={searchTerm}
+                refreshProducts={refreshProducts}
+                user={user} // <-- Add this line
+              />
             )}
           </div>
         </main>
