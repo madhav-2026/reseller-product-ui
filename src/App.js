@@ -5,6 +5,7 @@ import AdminAddProduct from './components/AdminAddProduct';
 import OrderHistory from './components/OrderHistory';
 import LoginForm from './components/LoginForm';
 import AdminOrderList from './components/AdminOrderList';
+import LocationDistance from './components/LocationDistance';
 
 const categories = [
   "Groceries",
@@ -30,39 +31,47 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshProducts, setRefreshProducts] = useState(true); // Set to true to trigger initial load
   const [profileOpen, setProfileOpen] = useState(false);
+  const [, setDeliveryDistance] = useState(null);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // Accept user info from LoginForm
+  // On login success, save user to sessionStorage
   const handleLoginSuccess = (userInfo) => {
     setIsLoggedIn(true);
     setUser(userInfo);
-    setSelectedCategory("Groceries"); // Always set to Groceries on login
-    setRefreshProducts(prev => !prev); // Trigger product load
+    sessionStorage.setItem('user', JSON.stringify(userInfo)); // <-- changed to sessionStorage
+    setSelectedCategory("Groceries");
+    setRefreshProducts(prev => !prev);
   };
 
+  // On logout, remove user from sessionStorage
   const handleLogout = () => {
     setIsLoggedIn(false);
-    // Do NOT clear the cart here
+    setUser(null);
+    sessionStorage.removeItem('user'); // <-- changed to sessionStorage
     setShowCart(false);
     setShowAdmin(false);
     setShowOrderHistory(false);
   };
 
-  // Handler for category click
+  // On app load, check sessionStorage for user
+  useEffect(() => {
+    const savedUser = sessionStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      setIsLoggedIn(true);
+    }
+  }, []);
+
   const handleCategoryClick = (cat) => {
     setSelectedCategory(cat);
-    setShowCart(false);           // <-- Hide cart
-    setShowAdmin(false);          // <-- Hide admin screens
-    setShowOrderHistory(false);   // <-- Hide order history
-    setOrderSuccess(false);       // <-- Hide order success message
-    // When "Groceries" is clicked, trigger a refresh to load from backend
-    if (cat === "Groceries") {
-      setRefreshProducts(prev => !prev); // Toggle to force ProductList to reload
-    }
+    setShowCart(false);
+    setShowAdmin(false);
+    setShowOrderHistory(false);
+    setOrderSuccess(false);
   };
 
   if (!isLoggedIn) {
@@ -110,6 +119,8 @@ function App() {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="p-4 bg-blue-100 flex items-center justify-between shadow-md border-b border-blue-200 rounded-b-2xl transition-all duration-300">
+          {/* Show location distance at the top right */}
+          <LocationDistance setDeliveryDistance={setDeliveryDistance} />
           {/* Left: Navigation */}
           <div className="flex gap-2 md:gap-4">
             {/* Admin buttons removed from here */}

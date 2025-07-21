@@ -87,12 +87,52 @@ function Cart({ cart, setCart, user, onRemove, onOrderPlaced, setShowCart, setSe
               <tbody>
                 {cart.map((item, index) => {
                   let qty = item.quantity || 1;
-                  let qtyClass = qty >= 5 ? 'text-xl font-bold text-red-600' : qty >= 2 ? 'text-lg font-semibold text-yellow-600' : 'text-base';
+                  let unit = "";
+                  let qtyDisplay = qty;
+
+                  if (item.unit) {
+                    const unitLower = item.unit.toLowerCase();
+                    // For oil products, always show "l"
+                    if (item.name && item.name.toLowerCase().includes("oil")) {
+                      unit = "l";
+                      qtyDisplay = qty;
+                    } else if (unitLower.includes("kg") || unitLower.includes("g")) {
+                      if (qty >= 1000) {
+                        unit = "kg";
+                        qtyDisplay = qty / 1000;
+                      } else {
+                        unit = "g";
+                        qtyDisplay = qty;
+                      }
+                    } else if (unitLower.includes("l")) {
+                      unit = "l";
+                      qtyDisplay = qty;
+                    } else if (unitLower.includes("ml")) {
+                      unit = "ml";
+                      qtyDisplay = qty;
+                    } else {
+                      // Default to g if unknown unit
+                      unit = "g";
+                      qtyDisplay = qty;
+                    }
+                  } else {
+                    // If no unit, check for oil in name, else default to g
+                    if (item.name && item.name.toLowerCase().includes("oil")) {
+                      unit = "l";
+                      qtyDisplay = qty;
+                    } else {
+                      unit = "g";
+                      qtyDisplay = qty;
+                    }
+                  }
+
                   return (
                     <tr key={index} className="hover:bg-blue-50 transition">
                       <td className="py-3 px-2 sm:px-4 border-b border-l flex items-center gap-2">
                         <span className="font-medium">{item.name}</span>
-                        <span className={`ml-2 px-2 py-1 rounded bg-blue-100 ${qtyClass}`}>{qty}</span>
+                        <span className="ml-2 px-2 py-1 rounded bg-blue-100 text-base text-gray-700 whitespace-nowrap">
+                          {`${qtyDisplay}${unit}`}
+                        </span>
                       </td>
                       <td className="py-3 px-2 sm:px-4 border-b text-right border-l font-semibold text-blue-800">₹{item.price}</td>
                       <td className="py-3 px-2 sm:px-4 border-b border-r text-center align-middle">
