@@ -101,16 +101,11 @@ function LoginForm({ onLoginSuccess }) {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
       <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center mb-2 shadow-lg">
-            <span className="text-white text-4xl font-extrabold">ATO</span>
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg">
+            <span className="text-white text-2xl font-extrabold">ATO</span>
           </div>
-          <div className="text-lg font-bold text-gray-800 mb-1">Any Time Order</div>
-          <h2 className="text-2xl font-extrabold text-gray-800 mb-1 tracking-tight">
-            {step === 'register' ? 'Customer Registration' : 'Login'}
-          </h2>
-          <p className="text-gray-500 text-sm">
-            {step === 'register' ? 'Create your account' : 'Sign in to your account'}
-          </p>
+          {/* <span className="text-xs font-bold text-gray-700 mt-1">Any Time Order</span> */}
+          <span className="text-lg font-semibold text-gray-700 mt-3">Please Login</span>
         </div>
         {error && <div className="text-red-500 mb-4 text-center font-medium">{error}</div>}
 

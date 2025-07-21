@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const AdminAddProduct = () => {
+const AdminAddProduct = ({ setShowAdmin, setSelectedCategory }) => {
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
     const [quantity, setQuantity] = useState('');
@@ -26,13 +26,13 @@ const AdminAddProduct = () => {
                 const arr = weightOptions.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
                 formData.append('weightOptions', JSON.stringify(arr));
             }
-            axios.post('http://localhost:9090/api/upload', formData, {
+            await axios.post('http://localhost:9090/api/upload', formData, {
                 headers: {
                     Authorization: 'Basic ' + btoa('admin:admin123'),
                     'Content-Type': 'multipart/form-data'
                 },
                 withCredentials: true
-            })
+            });
 
             alert('Product added successfully!');
             setName('');
@@ -48,7 +48,9 @@ const AdminAddProduct = () => {
 
     return (
         <form onSubmit={handleSubmit} className="p-4 max-w-md mx-auto">
-            <h2 className="text-xl font-bold mb-4">Add Product</h2>
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Add Product</h2>
+            </div>
             <input
                 type="text"
                 placeholder="Product Name"
@@ -86,9 +88,24 @@ const AdminAddProduct = () => {
                 onChange={(e) => setImage(e.target.files[0])}
                 className="mb-2 w-full"
             />
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-                Add Product
-            </button>
+            <div className="flex gap-2 mt-4">
+                <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                    Add Product
+                </button>
+                <button
+                    type="button"
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                    onClick={() => {
+                        if (setShowAdmin) setShowAdmin(false);
+                        if (setSelectedCategory) setSelectedCategory("Groceries");
+                    }}
+                >
+                    Go To Products
+                </button>
+            </div>
         </form>
     );
 };

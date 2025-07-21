@@ -1,35 +1,88 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const OrderHistory = () => {
+const statusColors = {
+  Pending: "bg-yellow-200 text-yellow-900 border-yellow-400",
+  Completed: "bg-green-200 text-green-900 border-green-400",
+  Failed: "bg-red-200 text-red-900 border-red-400",
+};
+
+const OrderHistory = ({ user, setShowOrderHistory, setSelectedCategory }) => {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:9090/api/orders')
+    if (!user || !user.phone) return;
+    axios.get(`http://localhost:9090/api/orders/history/${user.phone}`)
       .then(response => {
         setOrders(response.data);
       })
       .catch(error => {
         console.error('Error fetching order history:', error);
       });
-  }, []);
+  }, [user]);
+
+  if (!user || !user.phone) {
+    return <div className="p-4">Please log in to view your order history.</div>;
+  }
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Order History</h2>
-      {orders.length === 0 ? (
-        <p>No orders placed yet.</p>
+    <div className="p-4 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 min-h-screen">
+      <h2 className="text-3xl mb-8 text-blue-700 flex items-center gap-3 drop-shadow">
+        <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4M4 11h16" /></svg>
+        Order History
+      </h2>
+      {orders && orders.length > 0 ? (
+        orders.map((order, idx) => (
+          <div
+            key={idx}
+            className={`mb-10 p-6 border-2 rounded-2xl shadow-xl bg-white/80 hover:bg-white transition-all duration-200 ${statusColors[order.status] || statusColors.Pending}`}
+          >
+            <div className="flex justify-between items-center mb-3">
+              <div className="font-semibold text-gray-700">
+                <span className="mr-2">Order Date:</span>
+                <span className="text-gray-900">{order.date ? new Date(order.date).toLocaleString() : "N/A"}</span>
+              </div>
+              <span className={`px-4 py-1 rounded-full text-base font-bold border ${statusColors[order.status] || statusColors.Pending}`}>
+                {order.status ? order.status : "Pending"}
+              </span>
+            </div>
+            <div className="mb-3">
+              <div className="font-semibold text-gray-700 mb-1">Items:</div>
+              <div className="space-y-2">
+                {order.items && order.items.length > 0
+                  ? order.items.map(item => (
+                      <div key={item._id || item.name} className="flex justify-between items-center bg-purple-50 rounded px-4 py-2 shadow-sm">
+                        <span className="text-gray-900 font-medium">
+                          {item.name} <span className="text-xs text-gray-500">x {item.quantity}</span>
+                        </span>
+                        <span className="text-purple-700 font-bold">₹{item.price}</span>
+                      </div>
+                    ))
+                  : <span className="text-gray-400">No items</span>}
+              </div>
+            </div>
+            <div className="flex justify-end mt-4">
+              <span className="text-xl text-blue-700 drop-shadow">
+                Total: ₹{order.total}
+              </span>
+            </div>
+          </div>
+        ))
       ) : (
-        <ul className="space-y-4">
-          {orders.map((order, index) => (
-            <li key={index} className="border p-4 rounded shadow">
-              <p><strong>Date:</strong> {new Date(order.timestamp).toLocaleString()}</p>
-              <p><strong>Items:</strong> {Array.isArray(order.items) ? order.items.map(item => item.name).join(', ') : 'No items'}</p>
-              <p><strong>Total:</strong> ₹{order.total}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="text-gray-500 text-center mt-8">No orders found.</div>
       )}
+      {/* Close Button at the end */}
+      <div className="flex justify-end mt-8">
+        <button
+          onClick={() => {
+            if (setShowOrderHistory) setShowOrderHistory(false);
+            if (setSelectedCategory) setSelectedCategory("Groceries");
+          }}
+          className="px-6 py-3 rounded-lg text-white text-lg font-semibold shadow transition bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700"
+        >
+          Close
+        </button>
+      </div>
     </div>
   );
 };

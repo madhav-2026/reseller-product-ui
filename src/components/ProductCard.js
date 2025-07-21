@@ -1,18 +1,18 @@
-
 import React, { useState } from 'react';
 
 const ProductCard = ({ product, addToCart }) => {
     const [qty, setQty] = useState(1);
-    // Detect if product is sold by weight (e.g., has unit 'kg' or 'g' in product.quantity or product.unit)
     const isWeightProduct =
         (product.unit && (product.unit.toLowerCase().includes('kg') || product.unit.toLowerCase().includes('g')))
         || (product.quantity && (product.quantity.toLowerCase().includes('kg') || product.quantity.toLowerCase().includes('g')));
 
-    // Use product.weightOptions if present, else default [500, 1000, 2000]
+    // Remove duplicates from weightOptions
     const weightOptions = isWeightProduct && Array.isArray(product.weightOptions) && product.weightOptions.length > 0
-        ? product.weightOptions
+        ? [...new Set(product.weightOptions)]
         : [500, 1000, 2000];
-    const [weight, setWeight] = useState(isWeightProduct ? weightOptions[0] : 1); // default to first option
+
+    // Use function initializer to set weight only once
+    const [weight, setWeight] = useState(() => (isWeightProduct ? weightOptions[0] : 1));
 
     return (
         <div className="w-40 bg-white shadow-md rounded-lg p-2 m-2 flex flex-col items-center">
@@ -25,17 +25,21 @@ const ProductCard = ({ product, addToCart }) => {
             {isWeightProduct ? (
                 <>
                     <p className="text-gray-600">₹{Math.round((product.price * weight) / 1000)} / {weight >= 1000 ? (weight/1000) + 'kg' : weight + 'g'}</p>
-                    <select
-                        value={weight}
-                        onChange={e => setWeight(Number(e.target.value))}
-                        className="w-20 px-1 py-1 border rounded text-center mt-2"
-                    >
-                        {weightOptions.map(opt => (
-                            <option key={opt} value={opt}>
-                                {opt >= 1000 ? (opt/1000) + 'kg' : opt + 'g'}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="flex items-center gap-2 mt-2">
+                        <label htmlFor="weight" className="text-sm">Qty:</label>
+                        <select
+                            id="weight"
+                            value={weight}
+                            onChange={e => setWeight(Number(e.target.value))}
+                            className="w-20 px-1 py-1 border rounded text-center"
+                        >
+                            {weightOptions.map(opt => (
+                                <option key={opt} value={opt}>
+                                    {opt >= 1000 ? (opt/1000) + 'kg' : opt + 'g'}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </>
             ) : (
                 <>
@@ -56,7 +60,6 @@ const ProductCard = ({ product, addToCart }) => {
             <button
                 onClick={() => {
                     if (isWeightProduct) {
-                        // Calculate price for selected weight
                         const price = Math.round((product.price * weight) / 1000);
                         addToCart({ ...product, quantity: weight + 'g', price });
                     } else {
