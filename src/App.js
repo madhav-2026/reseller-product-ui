@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ProductList from './components/ProductList';
 import Cart from './components/Cart';
 import AdminAddProduct from './components/AdminAddProduct';
@@ -6,6 +6,7 @@ import OrderHistory from './components/OrderHistory';
 import LoginForm from './components/LoginForm';
 import AdminOrderList from './components/AdminOrderList';
 import OrderSummary from './components/OrderSummary';
+import LocationDistance from './components/LocationDistance';
 
 function App() {
   const [cart, setCart] = useState(() => {
@@ -19,10 +20,10 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null); // { name, address, ... }
   const [selectedCategory, setSelectedCategory] = useState("Groceries"); // Set default to "Groceries"
-  const [searchTerm, setSearchTerm] = useState("");
   const [refreshProducts, setRefreshProducts] = useState(true); // Set to true to trigger initial load
   const [profileOpen, setProfileOpen] = useState(false);
   const [showOrderSummary, setShowOrderSummary] = useState(false);
+  const profileRef = useRef();
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
@@ -42,10 +43,12 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUser(null);
-    sessionStorage.removeItem('user'); // <-- changed to sessionStorage
+    sessionStorage.removeItem('user');
     setShowCart(false);
     setShowAdmin(false);
     setShowOrderHistory(false);
+    setShowOrderSummary(false);
+    setProfileOpen(false);
   };
 
   // On app load, check sessionStorage for user
@@ -57,69 +60,40 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [profileOpen]);
+
   if (!isLoggedIn) {
     return <LoginForm onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
-      {/* Remove Sidebar */}
-      {/* <aside className="w-60 bg-white/80 border-r border-purple-200 p-6 flex flex-col justify-between">
-        <div>
-          <div className="font-bold text-gray-700 mb-2 mt-6">Categories</div>
-          <ul className="space-y-2">
-            {categories.map(cat => (
-              <li key={cat}>
-                <button
-                  className={`w-full text-left px-3 py-2 rounded transition ${
-                    selectedCategory === cat
-                      ? "bg-purple-200 text-purple-900 font-semibold"
-                      : "hover:bg-purple-100 text-gray-700"
-                  }`}
-                  onClick={() => handleCategoryClick(cat)}
-                  disabled={cat !== "Groceries"}
-                  style={cat !== "Groceries" ? { opacity: 0.5, cursor: "not-allowed" } : {}}
-                >
-                  {cat}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </aside> */}
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="p-4 bg-blue-100 flex flex-col shadow-md border-b border-blue-200 rounded-b-2xl transition-all duration-300">
-          {/* Top info section moved to left */}
-          <div className="flex items-center w-full mb-2">
-            <div className="flex flex-col items-start">
-              <span className="text-2xl font-extrabold text-blue-700">ATO</span>
-              <span className="text-xs text-gray-600 mt-1">Delivery in 30 min</span>
-              <a
-
-                href={`https://www.google.com/maps/search/?api=1&query=17.558595,78.261703`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-blue-700 hover:underline mt-1"
-                style={{ whiteSpace: "nowrap" }}
-              >
-                <svg
-                  className="w-4 h-4 text-blue-700"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" />
-                </svg>
-                <span className="font-semibold">ATO Shop, Main Road, Hyderabad, Telangana</span>
-              </a>
+        <header className="p-4 bg-blue-100 flex flex-col shadow-md border-b border-blue-200 rounded-b-2xl transition-all duration-300 relative">
+          {/* Main header content: left-aligned and right-aligned */}
+          <div className="flex items-start w-full mb-2">
+            <div className="flex flex-col items-start flex-1">
+              {/* No ATO here */}
+              <LocationDistance user={user} />
             </div>
-            {/* Spacer for alignment */}
-            <div className="flex-1"></div>
-            {/* Cart/Profile/etc. remain on the right */}
-            <div className="flex items-center gap-4 mt-2">
+            {/* Cart and Profile icon at the top right */}
+            <div className="flex items-center gap-1">
               {user && user.phone !== "+918074689114" && (
                 <button
                   className="flex items-center gap-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-lg shadow hover:bg-blue-300 font-semibold transition"
@@ -134,24 +108,22 @@ function App() {
                     alt="Cart"
                     className="w-6 h-6"
                   />
-                  Cart <span className="ml-1">({cart.length})</span>
+                  <span className="ml-0">({cart.length})</span>
                 </button>
               )}
-              {/* Profile/Settings */}
-              <div className="relative">
+              {/* Profile icon and dropdown */}
+              <div className="relative" ref={profileRef}>
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-3 py-2 bg-blue-200 text-blue-800 rounded-full shadow hover:bg-blue-300 font-semibold transition"
+                  className="flex items-center justify-center w-10 h-10 bg-blue-200 text-blue-800 rounded-full shadow hover:bg-blue-300 font-semibold transition"
                   tabIndex={0}
                   onClick={() => setProfileOpen((open) => !open)}
-                  onBlur={() => setTimeout(() => setProfileOpen(false), 150)} // closes on blur
+                  aria-label="Profile"
                 >
                   <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <circle cx="12" cy="7" r="4" />
                     <path d="M5.5 21a7.5 7.5 0 0 1 13 0" />
                   </svg>
-                  <span className="md:inline">{user?.name || user?.firstName || "Profile"}</span>
-                  <svg className="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50">
@@ -164,7 +136,6 @@ function App() {
                     >
                       Account
                     </button>
-                    {/* Show "Your Orders" only for non-admin users */}
                     {user && user.phone !== "+918074689114" && (
                       <button
                         className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
@@ -172,14 +143,13 @@ function App() {
                           setShowOrderHistory(true);
                           setShowCart(false);
                           setShowAdmin(false);
-                          setShowOrderSummary(false); // <-- Add this line to hide OrderSummary
+                          setShowOrderSummary(false);
                           setProfileOpen(false);
                         }}
                       >
                         Your Orders
                       </button>
                     )}
-                    {/* Admin links in profile dropdown */}
                     {user && user.phone === "+918074689114" && (
                       <>
                         <button
@@ -188,6 +158,7 @@ function App() {
                             setShowAdmin("orders");
                             setShowCart(false);
                             setShowOrderHistory(false);
+                            setShowOrderSummary(false);
                             setProfileOpen(false);
                           }}
                         >
@@ -199,6 +170,7 @@ function App() {
                             setShowAdmin(true);
                             setShowCart(false);
                             setShowOrderHistory(false);
+                            setShowOrderSummary(false);
                             setProfileOpen(false);
                           }}
                         >
@@ -208,10 +180,7 @@ function App() {
                     )}
                     <button
                       className="w-full text-left px-4 py-2 hover:bg-blue-50 text-red-600"
-                      onClick={() => {
-                        handleLogout();
-                        setProfileOpen(false);
-                      }}
+                      onClick={handleLogout}
                     >
                       Logout
                     </button>
@@ -219,16 +188,6 @@ function App() {
                 )}
               </div>
             </div>
-          </div>
-          {/* Search Bar */}
-          <div className="flex-1 flex justify-center w-full">
-            <input
-              type="text"
-              className="w-full max-w-xs px-4 py-2 border-0 rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white text-blue-700 placeholder-blue-400 transition"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
           </div>
         </header>
 
@@ -257,7 +216,7 @@ function App() {
                 cart={cart}
                 onClose={() => {
                   setShowOrderSummary(false);
-                  setShowCart(true); // Show cart again when closing summary
+                  setShowCart(true);
                 }}
               />
             ) : showOrderHistory ? (
@@ -271,8 +230,11 @@ function App() {
                 setShowAdmin={setShowAdmin}
                 setSelectedCategory={setSelectedCategory}
               />
-            ) : showAdmin ? (
-              <AdminAddProduct setShowAdmin={setShowAdmin} setSelectedCategory={setSelectedCategory} />
+            ) : showAdmin === true ? (
+              <AdminAddProduct
+                setShowAdmin={setShowAdmin}
+                setSelectedCategory={setSelectedCategory}
+              />
             ) : showCart ? (
               <Cart
                 cart={cart}
@@ -282,18 +244,16 @@ function App() {
                   setCart(cart => cart.filter((_, idx) => idx !== removeIndex));
                 }}
                 setShowCart={setShowCart}
-                setShowOrderSummary={setShowOrderSummary} // pass this to Cart
+                setShowOrderSummary={setShowOrderSummary}
                 setSelectedCategory={setSelectedCategory}
               />
             ) : (
-              // Always show all products by default when logged in, filtered by search
               <ProductList
                 cart={cart}
                 setCart={setCart}
                 selectedCategory={selectedCategory}
-                searchTerm={searchTerm}
                 refreshProducts={refreshProducts}
-                user={user} // <-- Add this line
+                user={user}
               />
             )}
           </div>

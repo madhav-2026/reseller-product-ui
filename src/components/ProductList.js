@@ -29,11 +29,13 @@ function ProductList({ cart, setCart, selectedCategory, searchTerm, refreshProdu
     return matchesCategory && matchesSearch;
   });
 
+  // Update the grid to remove all gaps between product cards
+
   return (
-    <div className="w-full max-w-sm sm:max-w-3xl mx-auto p-2 sm:p-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+    <div className="w-full max-w-sm sm:max-w-3xl mx-auto p-0 sm:p-0">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-0">
         {filteredProducts.length === 0 ? (
-          <div className="col-span-full text-center text-gray-500 py-12">
+          <div className="col-span-full text-center text-gray-500 py-8">
             No products found.
           </div>
         ) : (
@@ -42,7 +44,7 @@ function ProductList({ cart, setCart, selectedCategory, searchTerm, refreshProdu
               key={product.id || product._id}
               product={product}
               addToCart={prod => setCart(prev => [...prev, prod])}
-              user={user} // <-- Add this line
+              user={user}
             />
           ))
         )}

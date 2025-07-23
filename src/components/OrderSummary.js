@@ -36,7 +36,7 @@ export default function OrderSummary({ cart, onClose }) {
   }, []);
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
-  const deliveryCharge = distance > 3 ? 20 : 0;
+  const deliveryCharge = distance > 3  ? 20 : 0;
   const grandTotal = total + deliveryCharge;
 
   return (

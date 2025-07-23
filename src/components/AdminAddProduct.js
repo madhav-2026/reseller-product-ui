@@ -5,27 +5,31 @@ function AdminAddProduct({ setShowAdmin, setSelectedCategory }) {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]); // <-- changed from image to images array
   const [weightOptions, setWeightOptions] = useState(''); // comma-separated string
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!image) return alert("Please select an image");
+    if (!images.length) return alert("Please select at least one image");
 
     const formData = new FormData();
     formData.append('name', name);
     formData.append('price', price);
     formData.append('quantity', quantity);
-    formData.append('image', image);
-    formData.append('weightOptions', weightOptions);
+
+    // Append all images with the same key as backend expects
+    for (let i = 0; i < images.length; i++) {
+      formData.append('image', images[i]);
+    }
+
+    // Parse weightOptions as array of numbers if provided
+    if (weightOptions.trim()) {
+      const arr = weightOptions.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      formData.append('weightOptions', JSON.stringify(arr));
+    }
 
     try {
       axios.defaults.headers.common['Authorization'] = `Basic ${sessionStorage.getItem('auth')}`;
-      // Parse weightOptions as array of numbers if provided
-      if (weightOptions.trim()) {
-        const arr = weightOptions.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
-        formData.append('weightOptions', JSON.stringify(arr));
-      }
       await axios.post('http://localhost:9090/api/upload', formData, {
         headers: {
           Authorization: 'Basic ' + btoa('admin:admin123'),
@@ -38,7 +42,7 @@ function AdminAddProduct({ setShowAdmin, setSelectedCategory }) {
       setName('');
       setPrice('');
       setQuantity('');
-      setImage(null);
+      setImages([]); // <-- reset images
       setWeightOptions('');
     } catch (error) {
       alert('Error uploading product');
@@ -80,8 +84,9 @@ function AdminAddProduct({ setShowAdmin, setSelectedCategory }) {
         />
         <input
           type="file"
+          multiple
           accept="image/*"
-          onChange={(e) => setImage(e.target.files[0])}
+          onChange={e => setImages(Array.from(e.target.files))}
           className="mb-2 w-full"
         />
         <button
