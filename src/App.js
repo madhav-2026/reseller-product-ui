@@ -27,7 +27,7 @@ function App() {
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
+    localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
   // On login success, save user to sessionStorage
@@ -204,7 +204,13 @@ function App() {
                       ? "bg-purple-200 text-purple-900 border-purple-400"
                       : "bg-white text-gray-700 border-purple-200 hover:bg-purple-50"
                   }`}
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    setShowOrderHistory(false);
+                    setShowOrderSummary(false);
+                    setShowAdmin(false);
+                    setShowCart(false);
+                  }}
                 >
                   {cat}
                 </button>
@@ -214,16 +220,20 @@ function App() {
             {showOrderSummary ? (
               <OrderSummary
                 cart={cart}
+                setCart={setCart}
                 onClose={() => {
-                  setShowOrderSummary(false);
-                  setShowCart(true);
+                  setShowOrderSummary(false); // Hide order summary
+                  setShowCart(false);         // Hide cart (optional, if you want to show product list)
+                  // Optionally reset category:
+                  // setSelectedCategory("Groceries");
                 }}
+                user={user}
               />
             ) : showOrderHistory ? (
               <OrderHistory
                 user={user}
+                setSelectedCategory={setSelectedCategory} // <-- Make sure this is present
                 setShowOrderHistory={setShowOrderHistory}
-                setSelectedCategory={setSelectedCategory}
               />
             ) : showAdmin === "orders" ? (
               <AdminOrderList
