@@ -30,7 +30,7 @@ export default function OrderSummary({ cart, onClose, user, setCart, setShowAddA
     if (user?.phone) {
       axios
         .get(`http://localhost:9090/api/customer/${user.phone}`)
-        .then((res) => setAddresses(res.data.addresses || [])) // <-- always fallback to []
+        .then((res) => setAddresses(res.data.addresses || []))
         .catch(() => setAddresses([]));
     }
   }, [user]);
@@ -77,14 +77,24 @@ export default function OrderSummary({ cart, onClose, user, setCart, setShowAddA
         longitude: selectedAddress?.lng || null,
         address: selectedAddress?.address || "",
       };
-      await axios.post("http://localhost:9090/api/orders/place", orderData);
+      const orderRes = await axios.post("http://localhost:9090/api/orders/place", orderData);
+      // Use _id if id is undefined
+      const mongoOrderId = orderRes.data._id || orderRes.data.id;
+      alert("mongoorder " + mongoOrderId);
 
       // Create Razorpay order for payment
       const paymentRes = await axios.post("http://localhost:9090/api/payment/create-order", { amount: grandTotal });
       const razorpayOrder = paymentRes.data;
+      const razorpayOrderId = razorpayOrder.id;
+
+      // Update MongoDB order with Razorpay order ID
+      await axios.put("http://localhost:9090/api/payment/update-razorpay-id", {
+        orderId: mongoOrderId,
+        razorpayOrderId: razorpayOrderId
+      });
 
       const options = {
-        key: "rzp_test_bmXXAclygUWgTk",
+        key: "rzp_test_bmXXAclygUWgTk", // Use your Razorpay Key ID
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
         name: "ATO",
@@ -215,11 +225,6 @@ export default function OrderSummary({ cart, onClose, user, setCart, setShowAddA
               onClick={() => {
                 if (setShowAddAddress) setShowAddAddress(false);
                 if (onClose) onClose();
-                // If you have setShowCart in props, call it to show the cart screen
-                if (typeof setCart === "function") {
-                  // Optionally, you can pass a callback to show cart in your parent component
-                  // For example: setShowCart(true);
-                }
               }}
             >
               Back to Cart
