@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 
 function Cart({ cart, setCart, user, onRemove, onOrderPlaced, setShowCart, setShowOrderSummary, setSelectedCategory }) {
+  const [cartError, setCartError] = useState(""); // Add error state
   const total = cart.reduce((acc, item) => acc + item.price, 0);
 
   return (
@@ -125,11 +126,21 @@ function Cart({ cart, setCart, user, onRemove, onOrderPlaced, setShowCart, setSh
         </>
       )}
       <div className="flex flex-col items-center justify-center gap-2 mt-8">
+        {cartError && (
+          <div className="mb-2 text-center text-red-600 font-semibold">
+            {cartError}
+          </div>
+        )}
         <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 w-full">
           <button
             onClick={() => {
-              setShowOrderSummary(true); // Show Order Summary screen
-              setShowCart(false);        // Hide Cart screen
+              if (!cart || !Array.isArray(cart) || cart.length === 0) {
+                setCartError("Please add products to your cart before viewing the Order Summary.");
+              } else {
+                setCartError("");
+                setShowOrderSummary(true); // Show Order Summary screen
+                setShowCart(false);        // Hide Cart screen
+              }
             }}
             className="w-full sm:w-auto px-4 sm:px-6 py-3 rounded-lg text-white text-base sm:text-lg font-semibold shadow transition bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700"
           >

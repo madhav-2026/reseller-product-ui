@@ -159,16 +159,17 @@ function AddressModal({ onClose, onSave, user }) {
 
 // Example backend API call to store address with customer phone number
 async function saveAddressToBackend(form, user) {
-  // Replace with your backend endpoint
-  const response = await fetch("http://localhost:9090/api/customer/address", {
+   const params = new URLSearchParams({
+      phone: user?.phone || ""
+   });
+  const response = await fetch(`http://localhost:9090/api/customer/address?${params.toString()}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      phone: user?.phone, // customer phone number
       address: form.address,
-      pincode: form.pincode,
+      pinCode: form.pincode,
       lat: form.lat,
       lng: form.lng,
     }),
@@ -235,7 +236,16 @@ export default function LocationDistance({ user, setEstimatedMinutes, setDeliver
     if (user?.phone) {
       fetch(`http://localhost:9090/api/customer/${user.phone}`)
         .then(res => res.json())
-        .then(data => setSavedAddresses(Array.isArray(data) ? data : []));
+        .then(data => {
+          // If your backend returns a customer object, use data.addresses
+          if (Array.isArray(data)) {
+            setSavedAddresses(data);
+          } else if (Array.isArray(data.addresses)) {
+            setSavedAddresses(data.addresses);
+          } else {
+            setSavedAddresses([]);
+          }
+        });
     }
   }, [user]);
 

@@ -88,9 +88,10 @@ const OrderHistory = ({ user, setSelectedCategory, setShowOrderHistory}) => {
                     <span className="font-semibold text-gray-800">Ordered On:</span>
                     <span className="ml-2 text-gray-600 text-sm">{order.date || "N/A"}</span>
                   </div>
+                  {/* Add Customer Name below Ordered On */}
                   <div className="mb-1">
-                    <span className="font-semibold text-gray-800">Customer Number:</span>
-                    <span className="ml-2 text-gray-600 text-sm">{order.customerPhone || "N/A"}</span>
+                    <span className="font-semibold text-gray-800">Customer Name:</span>
+                    <span className="ml-2 text-gray-600 text-sm">{order.customerName || "N/A"}</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end">

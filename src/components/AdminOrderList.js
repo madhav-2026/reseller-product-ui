@@ -26,11 +26,9 @@ const AdminOrderList = ({ setShowAdmin, setSelectedCategory }) => {
       await axios.patch(`http://localhost:9090/api/orders/status/${selectedOrder.id || selectedOrder._id}`, {
         status: newStatus,
       });
-      setOrders(orders.map(order =>
-        (order.id === selectedOrder.id || order._id === selectedOrder._id)
-          ? { ...order, status: newStatus }
-          : order
-      ));
+      // Fetch latest orders from backend after status update
+      const res = await axios.get('http://localhost:9090/api/orders/all');
+      setOrders(res.data);
       setSelectedOrder({ ...selectedOrder, status: newStatus });
     } catch (err) {
       alert("Failed to update status");

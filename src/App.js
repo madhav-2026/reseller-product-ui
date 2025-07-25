@@ -96,12 +96,9 @@ function App() {
             <div className="flex items-center gap-1">
               {user && user.phone !== "+918074689114" && (
                 <button
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-lg shadow hover:bg-blue-300 font-semibold transition"
-                  onClick={() => {
-                    setShowCart(true);
-                    setShowAdmin(false);
-                    setShowOrderHistory(false);
-                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-lg shadow hover:bg-blue-300 font-semibold transition disabled:opacity-50"
+                  onClick={() => setShowCart(true)}
+                  disabled={!cart || cart.length === 0}
                 >
                   <img
                     src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
@@ -223,7 +220,7 @@ function App() {
                 setCart={setCart}
                 onClose={() => {
                   setShowOrderSummary(false); // Hide order summary
-                  setShowCart(false);         // Hide cart (optional, if you want to show product list)
+                  setShowCart(true);         // Hide cart (optional, if you want to show product list)
                   // Optionally reset category:
                   // setSelectedCategory("Groceries");
                 }}
