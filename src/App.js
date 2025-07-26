@@ -7,6 +7,7 @@ import LoginForm from './components/LoginForm';
 import AdminOrderList from './components/AdminOrderList';
 import OrderSummary from './components/OrderSummary';
 import LocationDistance from './components/LocationDistance';
+import AccountModal from './components/AccountModal'; // Add this import at the top
 
 function App() {
   const [cart, setCart] = useState(() => {
@@ -23,6 +24,7 @@ function App() {
   const [refreshProducts, setRefreshProducts] = useState(true); // Set to true to trigger initial load
   const [profileOpen, setProfileOpen] = useState(false);
   const [showOrderSummary, setShowOrderSummary] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
   const profileRef = useRef();
 
   // Save cart to localStorage whenever it changes
@@ -76,6 +78,12 @@ function App() {
     };
   }, [profileOpen]);
 
+  // This function will be called when user info is updated in AccountModal
+  const handleUpdateUser = (updatedUser) => {
+    setUser(prev => ({ ...prev, ...updatedUser }));
+    // Optionally, send updated info to backend here
+  };
+
   if (!isLoggedIn) {
     return <LoginForm onLoginSuccess={handleLoginSuccess} />;
   }
@@ -127,7 +135,7 @@ function App() {
                     <button
                       className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700"
                       onClick={() => {
-                        alert('Account page coming soon!');
+                        setShowAccountModal(true);
                         setProfileOpen(false);
                       }}
                     >
@@ -265,6 +273,14 @@ function App() {
             )}
           </div>
         </main>
+        {/* Account Modal */}
+        {showAccountModal && (
+          <AccountModal
+            user={user}
+            onClose={() => setShowAccountModal(false)}
+            onSave={handleUpdateUser}
+          />
+        )}
       </div>
     </div>
   );
