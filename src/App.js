@@ -227,10 +227,14 @@ function App() {
                 cart={cart}
                 setCart={setCart}
                 onClose={() => {
-                  setShowOrderSummary(false); // Hide order summary
-                  setShowCart(true);         // Hide cart (optional, if you want to show product list)
-                  // Optionally reset category:
-                  // setSelectedCategory("Groceries");
+                  setShowOrderSummary(false);
+                  setShowCart(false);
+                  setShowOrderHistory(false);
+                  setShowAdmin(false);
+                }}
+                onBackToCart={() => {
+                  setShowOrderSummary(false);
+                  setShowCart(true);
                 }}
                 user={user}
               />

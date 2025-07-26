@@ -19,12 +19,12 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-export default function OrderSummary({ cart, onClose, user, setCart, setShowAddAddress }) {
+export default function OrderSummary({ cart, onClose, onBackToCart, user, setCart, setShowAddAddress }) {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [distance, setDistance] = useState(null);
   const [placingOrder, setPlacingOrder] = useState(false);
-  const [whatsappOpened, setWhatsappOpened] = useState(false);
+  const [orderSuccessInfo, setOrderSuccessInfo] = useState(null);
 
   useEffect(() => {
     if (user?.phone) {
@@ -101,16 +101,24 @@ export default function OrderSummary({ cart, onClose, user, setCart, setShowAddA
         description: "Order Payment",
         order_id: razorpayOrder.id,
         handler: async function (response) {
-          await axios.post("http://localhost:9090/api/payment/save-payment", {
-            paymentId: response.razorpay_payment_id,
-            razorpayOrderId: razorpayOrder.id,
-            status: "Completed"
-          });
-          if (setCart) setCart([]);
-          localStorage.removeItem("cart");
-          setWhatsappOpened(true);
-          alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
-        },
+  try {
+    await axios.post("http://localhost:9090/api/payment/save-payment", {
+      paymentId: response.razorpay_payment_id,
+      razorpayOrderId: razorpayOrder.id,
+      status: "Completed"
+    });
+    if (setCart) setCart([]);
+    localStorage.removeItem("cart");
+    setOrderSuccessInfo({
+      orderId: mongoOrderId,
+      paymentId: response.razorpay_payment_id,
+      amount: razorpayOrder.amount / 100, // if amount is in paise
+      status: "Completed"
+    });
+  } catch (e) {
+    alert("Payment saved, but failed to show summary.");
+  }
+},
         prefill: {
           name: user.name,
           email: user.email,
@@ -129,17 +137,22 @@ export default function OrderSummary({ cart, onClose, user, setCart, setShowAddA
 
   return (
     <div className="w-full max-w-sm sm:max-w-2xl mx-auto p-4 sm:p-8 bg-white shadow-2xl rounded-3xl border border-blue-200">
-      {whatsappOpened ? (
+      {orderSuccessInfo ? (
         <div className="flex flex-col items-center justify-center py-8">
           <div className="text-green-700 text-xl font-bold mb-4">
-            Please complete your order in WhatsApp.<br />
-            Once done, click below to continue shopping.
+            Payment Successful!
+          </div>
+          <div className="mb-4 text-gray-700 text-center">
+            <div><b>Order ID:</b> {orderSuccessInfo.orderId}</div>
+            <div><b>Payment ID:</b> {orderSuccessInfo.paymentId}</div>
+            <div><b>Amount Paid:</b> ₹{orderSuccessInfo.amount}</div>
+            <div><b>Status:</b> {orderSuccessInfo.status}</div>
           </div>
           <button
             className="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold shadow hover:bg-purple-700 transition"
             onClick={() => {
-              setWhatsappOpened(false);
-              onClose();
+              setOrderSuccessInfo(null);
+              if (onClose) onClose(); // This should take user to product list
             }}
           >
             Buy Again
@@ -222,10 +235,7 @@ export default function OrderSummary({ cart, onClose, user, setCart, setShowAddA
             )}
             <button
               className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg font-semibold shadow hover:bg-gray-400"
-              onClick={() => {
-                if (setShowAddAddress) setShowAddAddress(false);
-                if (onClose) onClose();
-              }}
+              onClick={onBackToCart}
             >
               Back to Cart
             </button>
